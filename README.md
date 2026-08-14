@@ -45,37 +45,37 @@ Module 6 proposed a three-tier architecture with Vue.js as the presentation laye
 ## Screenshots
 
 ### Running Application
-![Running Application](docs/screenshots/01-running-application.png)
+![Running Application](docs/screenshots/01-running-application.jpg)
 
 ### Add Order
-![Add Order](docs/screenshots/02-add-record.png)
+![Add Order](docs/screenshots/02-add-record.jpg)
 
 ### Order List
-![Order List](docs/screenshots/03-record-list.png)
+![Order List](docs/screenshots/03-record-list.jpg)
 
 ### Edit Order
-![Edit Order](docs/screenshots/04-edit-record.png)
+![Edit Order](docs/screenshots/04-edit-record.jpg)
 
 ### Delete Confirmation
-![Delete Confirmation](docs/screenshots/05-delete-confirmation.png)
+![Delete Confirmation](docs/screenshots/05-delete-confirmation.jpg)
 
 ### Search Function
-![Search Function](docs/screenshots/06-search-function.png)
+![Search Function](docs/screenshots/06-search-function.jpg)
 
 ### localStorage Data
-![localStorage](docs/screenshots/07-localstorage.png)
+![localStorage](docs/screenshots/07-localstorage.jpg)
 
 ### Responsive Mobile View
-![Responsive View](docs/screenshots/08-responsive-view.png)
+![Responsive View](docs/screenshots/08-responsive-view.jpg)
 
 ### GitHub Repository
-![GitHub Repository](docs/screenshots/09-github-repository.png)
+![GitHub Repository](docs/screenshots/09-github-repository.jpg)
 
 ### Commit History
-![Commit History](docs/screenshots/10-commit-history.png)
+![Commit History](docs/screenshots/10-commit-history.jpg)
 
 ### CI Build Success
-![CI Success](docs/screenshots/11-ci-success.png)
+![CI Success](docs/screenshots/11-ci-success.jpg)
 
 ## Known Limitations and Future Improvements
 - No real backend, API, or database connection yet, data is local to the browser only.
