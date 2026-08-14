@@ -43,7 +43,39 @@ This prototype simulates the data layer using the browser's localStorage instead
 Module 6 proposed a three-tier architecture with Vue.js as the presentation layer, Node.js/Express as the application layer, and MongoDB Atlas as the data layer. Module 7 implements only the presentation layer and a simulated data layer using localStorage for the Order entity, while the backend, API, and database remain proposed future components.
 
 ## Screenshots
-Screenshots will be added after testing.
+
+### Running Application
+![Running Application](docs/screenshots/01-running-application.png)
+
+### Add Order
+![Add Order](docs/screenshots/02-add-record.png)
+
+### Order List
+![Order List](docs/screenshots/03-record-list.png)
+
+### Edit Order
+![Edit Order](docs/screenshots/04-edit-record.png)
+
+### Delete Confirmation
+![Delete Confirmation](docs/screenshots/05-delete-confirmation.png)
+
+### Search Function
+![Search Function](docs/screenshots/06-search-function.png)
+
+### localStorage Data
+![localStorage](docs/screenshots/07-localstorage.png)
+
+### Responsive Mobile View
+![Responsive View](docs/screenshots/08-responsive-view.png)
+
+### GitHub Repository
+![GitHub Repository](docs/screenshots/09-github-repository.png)
+
+### Commit History
+![Commit History](docs/screenshots/10-commit-history.png)
+
+### CI Build Success
+![CI Success](docs/screenshots/11-ci-success.png)
 
 ## Known Limitations and Future Improvements
 - No real backend, API, or database connection yet, data is local to the browser only.
