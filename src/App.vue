@@ -1,24 +1,27 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import AppHeader from './components/AppHeader.vue'
 import RecordForm from './components/RecordForm.vue'
 import RecordList from './components/RecordList.vue'
+import OrderBoard from './components/OrderBoard.vue'
 import AppFooter from './components/AppFooter.vue'
 
 const records = ref([])
 const searchTerm = ref('')
 const editingId = ref(null)
 const darkMode = ref(false)
-const themeWipe = ref(false)
-const wipeClass = ref('')
-const wipeStyle = ref({})
+const ripple = ref(false)
+const rippleClass = ref('')
+const rippleStyle = ref({})
 const isLoading = ref(true)
+const viewMode = ref('list')
+const statusFilter = ref(null)
+const clickedCard = ref(null)
+const listAnchor = ref(null)
 
-// Cursor glow
 const cursorX = ref(-999)
 const cursorY = ref(-999)
 
-// Toasts
 const toasts = ref([])
 let toastId = 0
 function pushToast(message, type = 'success') {
@@ -29,7 +32,6 @@ function pushToast(message, type = 'success') {
   }, 3000)
 }
 
-// Confetti
 function fireConfetti() {
   const colors = ['#fb923c', '#f97316', '#fbbf24', '#fde68a', '#fdba74']
   const container = document.body
@@ -46,7 +48,6 @@ function fireConfetti() {
   }
 }
 
-// Count-up animation
 function useCountUp(targetRef) {
   const display = ref(0)
   watch(targetRef, (newVal) => {
@@ -82,30 +83,12 @@ onMounted(() => {
 function toggleDark(event) {
   const x = event?.clientX ?? window.innerWidth / 2
   const y = event?.clientY ?? window.innerHeight / 2
-
-  // Farthest distance from click point to any corner (so circle fully covers screen)
-  const maxX = Math.max(x, window.innerWidth - x)
-  const maxY = Math.max(y, window.innerHeight - y)
-  const radius = Math.hypot(maxX, maxY)
-
-  wipeClass.value = darkMode.value ? 'to-light' : 'to-dark'
-  wipeStyle.value = {
-    '--x': x + 'px',
-    '--y': y + 'px',
-    '--r': radius + 'px'
-  }
-  themeWipe.value = true
-
-  // Swap theme exactly when the circle has fully covered the screen (midpoint)
-  setTimeout(() => {
-    darkMode.value = !darkMode.value
-    localStorage.setItem('module7-theme', darkMode.value ? 'dark' : 'light')
-  }, 375)
-
-  // Remove overlay after full animation finishes
-  setTimeout(() => {
-    themeWipe.value = false
-  }, 780)
+  rippleStyle.value = { '--rx': x + 'px', '--ry': y + 'px' }
+  rippleClass.value = darkMode.value ? 'light' : 'dark'
+  ripple.value = true
+  setTimeout(() => (ripple.value = false), 700)
+  darkMode.value = !darkMode.value
+  localStorage.setItem('module7-theme', darkMode.value ? 'dark' : 'light')
 }
 
 function saveRecords() {
@@ -147,12 +130,33 @@ function deleteRecord(id) {
   pushToast('Order deleted.', 'error')
 }
 
+function handleBoardDelete(record) {
+  const confirmed = window.confirm(`Delete the order for ${record.customerName}?`)
+  if (!confirmed) return
+  deleteRecord(record.id)
+}
+
+function updateStatus(id, newStatus) {
+  const record = records.value.find(r => r.id === id)
+  if (!record) return
+  record.status = newStatus
+  saveRecords()
+  pushToast(`Order marked as ${newStatus}.`, 'success')
+}
+
 const filteredRecords = computed(() => {
+  let list = records.value
+
+  if (statusFilter.value) {
+    list = list.filter(r => r.status === statusFilter.value)
+  }
+
   const keyword = searchTerm.value.toLowerCase().trim()
-  if (!keyword) return records.value
-  return records.value.filter(r =>
-    r.customerName.toLowerCase().includes(keyword)
-  )
+  if (keyword) {
+    list = list.filter(r => r.customerName.toLowerCase().includes(keyword))
+  }
+
+  return list
 })
 
 const totalOrdersRaw     = computed(() => records.value.length)
@@ -164,6 +168,48 @@ const totalOrders     = useCountUp(totalOrdersRaw)
 const pendingOrders   = useCountUp(pendingOrdersRaw)
 const preparingOrders = useCountUp(preparingOrdersRaw)
 const completedOrders = useCountUp(completedOrdersRaw)
+
+function scrollToColumnWhenReady(statusValue, attempts = 0) {
+  const el = document.getElementById(`board-col-${statusValue}`)
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  } else if (attempts < 15) {
+    setTimeout(() => scrollToColumnWhenReady(statusValue, attempts + 1), 50)
+  }
+}
+
+async function handleCardClick(cardKey, statusValue) {
+  clickedCard.value = cardKey
+  setTimeout(() => (clickedCard.value = null), 300)
+
+  if (statusFilter.value === statusValue) {
+    statusFilter.value = null
+    viewMode.value = 'list'
+    await nextTick()
+    setTimeout(() => {
+      listAnchor.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 350)
+    return
+  }
+
+  statusFilter.value = statusValue
+
+  if (statusValue === null) {
+    viewMode.value = 'list'
+    await nextTick()
+    setTimeout(() => {
+      listAnchor.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 350)
+  } else {
+    viewMode.value = 'board'
+    await nextTick()
+    scrollToColumnWhenReady(statusValue)
+  }
+}
+
+function clearFilter() {
+  statusFilter.value = null
+}
 </script>
 
 <template>
@@ -171,19 +217,15 @@ const completedOrders = useCountUp(completedOrdersRaw)
     :class="darkMode ? 'bg-gray-900' : 'bg-orange-50/30'"
     class="min-h-screen relative overflow-x-hidden">
 
-    <!-- Iris wipe transition -->
-    <div v-if="themeWipe" :class="['theme-wipe', wipeClass]" :style="wipeStyle" />
+    <div v-if="ripple" :class="['theme-ripple', rippleClass]" :style="rippleStyle" />
 
-    <!-- Cursor glow -->
     <div :class="['cursor-glow', darkMode ? 'dark-mode' : 'light-mode']"
       :style="{ left: cursorX + 'px', top: cursorY + 'px' }" />
 
-    <!-- Background blobs -->
     <div :class="['bg-blob bg-blob-1', darkMode ? 'dark-1' : '']" />
     <div :class="['bg-blob bg-blob-2', darkMode ? 'dark-2' : '']" />
     <div :class="['bg-blob bg-blob-3', darkMode ? 'dark-3' : '']" />
 
-    <!-- Toasts -->
     <div class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 w-72 max-w-[90vw]">
       <transition-group name="toast">
         <div v-for="toast in toasts" :key="toast.id"
@@ -205,7 +247,6 @@ const completedOrders = useCountUp(completedOrdersRaw)
 
       <main class="max-w-5xl mx-auto px-4 py-8">
 
-        <!-- SKELETON LOADING STATE -->
         <div v-if="isLoading" class="space-y-6">
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div v-for="i in 4" :key="i" class="skeleton rounded-2xl h-24" />
@@ -214,21 +255,22 @@ const completedOrders = useCountUp(completedOrdersRaw)
           <div class="skeleton rounded-2xl h-48" />
         </div>
 
-        <!-- ACTUAL CONTENT -->
         <template v-else>
-          <!-- Summary Cards -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-            <div
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            <button
               v-for="card in [
-                { label: 'Total Orders', value: totalOrders,     accent: 'text-orange-500',  bg: darkMode ? 'bg-orange-500/10' : 'bg-orange-50',  border: darkMode ? 'border-orange-500/20' : 'border-orange-100' },
-                { label: 'Pending',      value: pendingOrders,   accent: 'text-amber-400',   bg: darkMode ? 'bg-amber-500/10'  : 'bg-amber-50',   border: darkMode ? 'border-amber-500/20'  : 'border-amber-100'  },
-                { label: 'Preparing',    value: preparingOrders, accent: 'text-blue-400',    bg: darkMode ? 'bg-blue-500/10'   : 'bg-blue-50',    border: darkMode ? 'border-blue-500/20'   : 'border-blue-100'   },
-                { label: 'Completed',    value: completedOrders, accent: 'text-emerald-400', bg: darkMode ? 'bg-emerald-500/10': 'bg-emerald-50', border: darkMode ? 'border-emerald-500/20': 'border-emerald-100' },
+                { key: 'total',     label: 'Total Orders', value: totalOrders,     status: null,        accent: 'text-orange-500',  bg: darkMode ? 'bg-orange-500/10' : 'bg-orange-50',  border: darkMode ? 'border-orange-500/20' : 'border-orange-100' },
+                { key: 'pending',   label: 'Pending',      value: pendingOrders,   status: 'Pending',    accent: 'text-amber-400',   bg: darkMode ? 'bg-amber-500/10'  : 'bg-amber-50',   border: darkMode ? 'border-amber-500/20'  : 'border-amber-100'  },
+                { key: 'preparing', label: 'Preparing',    value: preparingOrders, status: 'Preparing',  accent: 'text-blue-400',    bg: darkMode ? 'bg-blue-500/10'   : 'bg-blue-50',    border: darkMode ? 'border-blue-500/20'   : 'border-blue-100'   },
+                { key: 'completed', label: 'Completed',    value: completedOrders, status: 'Completed',  accent: 'text-emerald-400', bg: darkMode ? 'bg-emerald-500/10': 'bg-emerald-50', border: darkMode ? 'border-emerald-500/20': 'border-emerald-100' },
               ]"
-              :key="card.label"
+              :key="card.key"
+              @click="handleCardClick(card.key, card.status)"
               :class="[
                 darkMode ? 'bg-gray-900/80 border-gray-700/60' : 'bg-white/90 border-gray-200/80',
-                'card-lift rounded-2xl border shadow-lg backdrop-blur-sm px-5 py-4 relative overflow-hidden'
+                'card-lift rounded-2xl border shadow-lg backdrop-blur-sm px-5 py-4 relative overflow-hidden text-left cursor-pointer',
+                clickedCard === card.key ? 'card-clicked' : '',
+                statusFilter === card.status && card.status !== null ? 'card-active-ring' : ''
               ]">
               <div :class="[card.bg, card.border, 'absolute top-4 right-4 w-8 h-8 rounded-xl border flex items-center justify-center']">
                 <div :class="[card.accent, 'w-2 h-2 rounded-full bg-current']" />
@@ -238,10 +280,22 @@ const completedOrders = useCountUp(completedOrdersRaw)
                 {{ card.label }}
               </p>
               <p :class="card.accent" class="text-3xl font-bold">{{ card.value }}</p>
-            </div>
+            </button>
           </div>
 
-          <!-- Form -->
+          <transition name="chip-pop">
+            <div v-if="statusFilter" class="mb-6 flex items-center gap-2">
+              <span :class="darkMode ? 'text-gray-400' : 'text-gray-500'" class="text-xs">Filtering by:</span>
+              <span class="chip-pop inline-flex items-center gap-2 bg-orange-500 text-white text-xs font-semibold pl-3 pr-2 py-1.5 rounded-full">
+                {{ statusFilter }}
+                <button @click="clearFilter"
+                  class="w-4 h-4 rounded-full bg-white/25 hover:bg-white/40 flex items-center justify-center transition-colors">
+                  ✕
+                </button>
+              </span>
+            </div>
+          </transition>
+
           <RecordForm
             :editing-record="editingRecord"
             :dark-mode="darkMode"
@@ -249,7 +303,8 @@ const completedOrders = useCountUp(completedOrdersRaw)
             @cancel="cancelEdit"
           />
 
-          <!-- Search -->
+          <div ref="listAnchor"></div>
+
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <input
               v-model="searchTerm"
@@ -265,13 +320,45 @@ const completedOrders = useCountUp(completedOrdersRaw)
             </p>
           </div>
 
-          <!-- Record List -->
-          <RecordList
-            :records="filteredRecords"
-            :dark-mode="darkMode"
-            @edit="startEdit"
-            @delete="deleteRecord"
-          />
+          <div class="flex items-center gap-2 mb-4">
+            <button @click="viewMode = 'list'"
+              :class="viewMode === 'list'
+                ? 'bg-orange-500 text-white shadow shadow-orange-500/25'
+                : (darkMode ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-white text-gray-500 hover:bg-gray-100 border border-gray-200')"
+              class="text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-200">
+              List View
+            </button>
+            <button @click="viewMode = 'board'"
+              :class="viewMode === 'board'
+                ? 'bg-orange-500 text-white shadow shadow-orange-500/25'
+                : (darkMode ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-white text-gray-500 hover:bg-gray-100 border border-gray-200')"
+              class="text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-200">
+              Board View
+            </button>
+          </div>
+
+          <div class="relative">
+            <transition name="filter-swap" mode="out-in">
+              <RecordList
+                v-if="viewMode === 'list'"
+                :key="'list-' + statusFilter"
+                :records="filteredRecords"
+                :dark-mode="darkMode"
+                @edit="startEdit"
+                @delete="deleteRecord"
+                @update-status="updateStatus"
+              />
+              <OrderBoard
+                v-else
+                :key="'board-' + statusFilter"
+                :records="filteredRecords"
+                :dark-mode="darkMode"
+                @edit="startEdit"
+                @delete="handleBoardDelete"
+                @update-status="updateStatus"
+              />
+            </transition>
+          </div>
         </template>
       </main>
 

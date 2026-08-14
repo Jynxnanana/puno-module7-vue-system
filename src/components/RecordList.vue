@@ -5,7 +5,7 @@ const props = defineProps({
   records: { type: Array, required: true },
   darkMode: Boolean
 })
-const emit = defineEmits(['edit', 'delete'])
+const emit = defineEmits(['edit', 'delete', 'update-status'])
 
 const statusConfig = (status) => ({
   Pending:   { class: 'bg-amber-500/15 text-amber-400 border-amber-500/30',       dot: 'bg-amber-400' },
@@ -14,30 +14,35 @@ const statusConfig = (status) => ({
   Cancelled: { class: 'bg-red-500/15 text-red-400 border-red-500/30',             dot: 'bg-red-400' },
 }[status] || { class: 'bg-gray-500/15 text-gray-400 border-gray-500/30', dot: 'bg-gray-400' })
 
-// Delete confirmation modal state
+const nextStatus = (status) => ({
+  Pending: 'Preparing',
+  Preparing: 'Completed',
+}[status] || null)
+
+const nextStatusLabel = (status) => ({
+  Pending: 'Start Preparing',
+  Preparing: 'Mark Completed',
+}[status] || null)
+
 const confirmDeleteRecord = ref(null)
 const deletingId = ref(null)
 
 function askDelete(record) {
   confirmDeleteRecord.value = record
 }
-
 function cancelDelete() {
   confirmDeleteRecord.value = null
 }
-
 function confirmDelete() {
   const id = confirmDeleteRecord.value.id
   deletingId.value = id
   confirmDeleteRecord.value = null
-  // Let the shrink animation play before actually removing
   setTimeout(() => {
     emit('delete', id)
     deletingId.value = null
   }, 350)
 }
 
-// Edit pulse highlight
 const pulsingId = ref(null)
 function handleEdit(record) {
   pulsingId.value = record.id
@@ -124,17 +129,25 @@ function handleEdit(record) {
           {{ record.orderItems }}
         </p>
 
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between mb-3">
           <span class="font-bold text-orange-500 text-base">₱{{ record.totalAmount.toFixed(2) }}</span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <button v-if="nextStatus(record.status)"
+            @click="emit('update-status', record.id, nextStatus(record.status))"
+            class="btn-shimmer bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-150 active:scale-95 shadow shadow-orange-500/25 w-full">
+            {{ nextStatusLabel(record.status) }}
+          </button>
           <div class="flex gap-2">
             <button @click="handleEdit(record)"
               :class="darkMode ? 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border-blue-500/20' : 'bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200'"
-              class="btn-shimmer border text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-150 active:scale-95">
+              class="btn-shimmer border text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-150 active:scale-95 flex-1">
               Edit
             </button>
             <button @click="askDelete(record)"
               :class="darkMode ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border-red-500/20' : 'bg-red-50 text-red-500 hover:bg-red-100 border-red-200'"
-              class="icon-shake btn-shimmer border text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-150 active:scale-95">
+              class="icon-shake btn-shimmer border text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-150 active:scale-95 flex-1">
               Delete
             </button>
           </div>
@@ -189,7 +202,12 @@ function handleEdit(record) {
               </span>
             </td>
             <td class="px-6 py-4">
-              <div class="flex gap-2 opacity-60 group-hover:opacity-100 transition-opacity duration-150">
+              <div class="flex items-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity duration-150">
+                <button v-if="nextStatus(record.status)"
+                  @click="emit('update-status', record.id, nextStatus(record.status))"
+                  class="btn-shimmer bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95 shadow shadow-orange-500/20 whitespace-nowrap">
+                  {{ nextStatusLabel(record.status) }}
+                </button>
                 <button @click="handleEdit(record)"
                   :class="darkMode ? 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border-blue-500/20' : 'bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200'"
                   class="btn-shimmer border text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95">
@@ -217,7 +235,6 @@ function handleEdit(record) {
             <div
               :class="darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'"
               class="modal-pop-enter-active rounded-2xl border shadow-2xl p-6 max-w-sm w-full">
-
               <div class="flex flex-col items-center text-center gap-3">
                 <div class="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center">
                   <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -231,7 +248,6 @@ function handleEdit(record) {
                 <p :class="darkMode ? 'text-gray-400' : 'text-gray-500'" class="text-sm">
                   Order for <span class="font-medium" :class="darkMode ? 'text-gray-200' : 'text-gray-700'">{{ confirmDeleteRecord.customerName }}</span> will be permanently removed. This action cannot be undone.
                 </p>
-
                 <div class="flex gap-3 w-full mt-2">
                   <button @click="cancelDelete"
                     :class="darkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
