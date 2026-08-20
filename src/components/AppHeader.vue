@@ -1,43 +1,53 @@
+
+Appheader · VUE
 <script setup>
 defineProps({ darkMode: Boolean })
-defineEmits(['toggle-dark'])
+defineEmits(['toggle-dark', 'open-menu'])
 </script>
-
+ 
 <template>
   <header
     :class="darkMode ? 'bg-gray-950/90 border-orange-900/30' : 'bg-white/80 border-orange-100'"
     class="border-b px-6 py-4 sticky top-0 z-50 backdrop-blur-md">
     <div class="max-w-5xl mx-auto flex items-center justify-between">
-
-      <!-- Logo + Brand -->
+ 
       <div class="flex items-center gap-3">
-        <div class="relative w-10 h-10 shrink-0">
-          <!-- Pulsing outer ring -->
-          <div class="logo-ring"></div>
-
-          <!-- Badge -->
-          <div class="logo-float logo-glow logo-shine relative w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 flex items-center justify-center">
-            <div class="absolute inset-0 rounded-2xl ring-1 ring-white/30"></div>
-            <svg class="w-5.5 h-5.5 text-white relative z-10" width="22" height="22" fill="none" viewBox="0 0 24 24">
-              <path d="M4 14a8 8 0 0116 0H4z" fill="white" fill-opacity="0.95"/>
-              <rect x="3" y="14" width="18" height="2.2" rx="1.1" fill="white"/>
-              <circle cx="12" cy="5.2" r="1.1" fill="white"/>
-              <rect x="11.35" y="6.3" width="1.3" height="2.2" rx="0.6" fill="white"/>
-            </svg>
+        <!-- Hamburger menu button -->
+        <button @click="$emit('open-menu')"
+          :class="darkMode ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-100'"
+          class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+ 
+        <!-- Logo + Brand -->
+        <div class="flex items-center gap-3">
+          <div class="relative w-10 h-10 shrink-0">
+            <div class="logo-ring"></div>
+            <div class="logo-float logo-glow logo-shine relative w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 flex items-center justify-center">
+              <div class="absolute inset-0 rounded-2xl ring-1 ring-white/30"></div>
+              <svg class="w-5.5 h-5.5 text-white relative z-10" width="22" height="22" fill="none" viewBox="0 0 24 24">
+                <path d="M4 14a8 8 0 0116 0H4z" fill="white" fill-opacity="0.95"/>
+                <rect x="3" y="14" width="18" height="2.2" rx="1.1" fill="white"/>
+                <circle cx="12" cy="5.2" r="1.1" fill="white"/>
+                <rect x="11.35" y="6.3" width="1.3" height="2.2" rx="0.6" fill="white"/>
+              </svg>
+            </div>
+          </div>
+ 
+          <div>
+            <h1 :class="darkMode ? 'text-white' : 'text-gray-900'"
+              class="text-lg font-bold tracking-tight leading-none">
+              FoodOrdering
+              <span class="text-orange-500">Management System</span>
+            </h1>
+            <p :class="darkMode ? 'text-gray-500' : 'text-gray-400'"
+              class="text-xs mt-1 leading-none">Streamlined order tracking for restaurants</p>
           </div>
         </div>
-
-        <div>
-          <h1 :class="darkMode ? 'text-white' : 'text-gray-900'"
-            class="text-lg font-bold tracking-tight leading-none">
-            FoodOrdering
-            <span class="text-orange-500">Management System</span>
-          </h1>
-          <p :class="darkMode ? 'text-gray-500' : 'text-gray-400'"
-            class="text-xs mt-1 leading-none">Streamlined order tracking for restaurants</p>
-        </div>
       </div>
-
+ 
       <!-- Theme toggle -->
       <button
         @click="$emit('toggle-dark', $event)"
@@ -59,3 +69,4 @@ defineEmits(['toggle-dark'])
     </div>
   </header>
 </template>
+ 

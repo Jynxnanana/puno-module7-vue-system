@@ -5,7 +5,7 @@ const props = defineProps({
   records: { type: Array, required: true },
   darkMode: Boolean
 })
-const emit = defineEmits(['edit', 'delete', 'update-status'])
+const emit = defineEmits(['edit', 'delete', 'update-status', 'view-receipt'])
 
 const statusConfig = (status) => ({
   Pending:   { class: 'bg-amber-500/15 text-amber-400 border-amber-500/30',       dot: 'bg-amber-400' },
@@ -131,6 +131,11 @@ function handleEdit(record) {
 
         <div class="flex items-center justify-between mb-3">
           <span class="font-bold text-orange-500 text-base">₱{{ record.totalAmount.toFixed(2) }}</span>
+          <button @click="emit('view-receipt', record)"
+            :class="darkMode ? 'text-gray-400 hover:text-orange-400' : 'text-gray-400 hover:text-orange-500'"
+            class="text-xs font-medium transition-colors">
+            🧾 Receipt
+          </button>
         </div>
 
         <div class="flex flex-col gap-2">
@@ -217,6 +222,11 @@ function handleEdit(record) {
                   :class="darkMode ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border-red-500/20' : 'bg-red-50 text-red-500 hover:bg-red-100 border-red-200'"
                   class="icon-shake btn-shimmer border text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-150 active:scale-95">
                   Delete
+                </button>
+                <button @click="emit('view-receipt', record)"
+                  :class="darkMode ? 'text-gray-500 hover:text-orange-400' : 'text-gray-400 hover:text-orange-500'"
+                  class="text-xs font-semibold px-2 py-1.5 transition-colors">
+                  🧾
                 </button>
               </div>
             </td>
