@@ -1,11 +1,11 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps({
   records: { type: Array, required: true },
   darkMode: Boolean
 })
-const emit = defineEmits(['edit', 'delete', 'update-status'])
+const emit = defineEmits(['edit', 'delete', 'update-status', 'view-receipt'])
 
 const columns = [
   { key: 'Pending',   label: 'Pending',   accent: 'text-amber-400',   dot: 'bg-amber-400',   bg: 'bg-amber-500/10',   border: 'border-amber-500/20' },
@@ -32,15 +32,34 @@ const nextStatusLabel = (status) => ({
   Pending: 'Start Preparing',
   Preparing: 'Mark Completed',
 }[status] || null)
+
+// Drag and drop
+const draggedId = ref(null)
+const dragOverCol = ref(null)
+
+function handleDrop(newStatus) {
+  if (draggedId.value !== null) {
+    emit('update-status', draggedId.value, newStatus)
+  }
+  draggedId.value = null
+  dragOverCol.value = null
+}
 </script>
 
 <template>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    
-<div v-for="col in columns" :key="col.key"
+    <div v-for="col in columns" :key="col.key"
       :id="`board-col-${col.key}`"
-      :class="darkMode ? 'bg-gray-900/70 border-gray-700/60' : 'bg-white/80 border-gray-200/70'"
-      class="rounded-2xl border shadow-lg backdrop-blur-sm overflow-hidden flex flex-col scroll-mt-24">
+      @dragover.prevent
+      @drop="handleDrop(col.key)"
+      @dragenter="dragOverCol = col.key"
+      @dragleave="dragOverCol = null"
+      :class="[
+        darkMode ? 'bg-gray-900/70 border-gray-700/60' : 'bg-white/80 border-gray-200/70',
+        dragOverCol === col.key ? 'ring-2 ring-orange-400' : ''
+      ]"
+      class="rounded-2xl border shadow-lg backdrop-blur-sm overflow-hidden flex flex-col scroll-mt-24 transition-all">
+
       <!-- Column header -->
       <div :class="[col.bg, col.border]" class="px-4 py-3 border-b flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -60,12 +79,19 @@ const nextStatusLabel = (status) => ({
           class="text-xs text-center py-6">No orders</p>
 
         <div v-for="record in grouped[col.key]" :key="record.id"
+          draggable="true"
+          @dragstart="draggedId = record.id"
           :class="darkMode ? 'bg-gray-800/60 border-gray-700/60 hover:border-orange-700/50' : 'bg-gray-50/80 border-gray-200 hover:border-orange-300'"
-          class="row-animate border rounded-xl p-3 transition-all duration-150">
+          class="row-animate border rounded-xl p-3 transition-all duration-150 cursor-grab active:cursor-grabbing">
 
-          <p :class="darkMode ? 'text-white' : 'text-gray-900'" class="font-semibold text-sm truncate mb-1">
-            {{ record.customerName }}
-          </p>
+          <div class="flex items-start justify-between gap-2 mb-1">
+            <p :class="darkMode ? 'text-white' : 'text-gray-900'" class="font-semibold text-sm truncate">
+              {{ record.customerName }}
+            </p>
+            <button @click="emit('view-receipt', record)"
+              :class="darkMode ? 'text-gray-500 hover:text-orange-400' : 'text-gray-400 hover:text-orange-500'"
+              class="text-xs shrink-0">🧾</button>
+          </div>
           <p :class="darkMode ? 'text-gray-400' : 'text-gray-500'" class="text-xs line-clamp-2 mb-2">
             {{ record.orderItems }}
           </p>
