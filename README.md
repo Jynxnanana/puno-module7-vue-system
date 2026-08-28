@@ -81,3 +81,31 @@ Module 6 proposed a three-tier architecture with Vue.js as the presentation laye
 - No real backend, API, or database connection yet, data is local to the browser only.
 - No user authentication or multi-user support.
 - Future versions will connect to Node.js/Express and MongoDB Atlas as proposed in Module 6.
+
+## Testing
+
+### Test Commands
+npm run test:run — Run all automated unit tests
+npm run build — Verify the production build succeeds
+
+### Automated Tests
+5 automated unit tests were written using Vitest, covering:
+- Search/filter logic (filterOrders)
+- Form validation logic (validateOrder)
+- Order status transitions (getNextStatus)
+
+All 5 tests currently pass.
+
+### Manual Testing
+12 manual test cases were executed covering Add, Display, Edit, Delete, Search, and
+Validation features. See docs/testing/test-cases.md for the full results.
+
+### Defect Found and Fixed
+BUG-01: The order form previously accepted negative total amounts. This was found
+during boundary-value testing (TC-03), documented in docs/testing/defect-report.md,
+and corrected in src/utils/orderUtils.js. The fix was verified through retesting and
+regression testing.
+
+### CI
+GitHub Actions now runs npm run test:run followed by npm run build on every push to
+main. See the Actions tab for the latest results.
