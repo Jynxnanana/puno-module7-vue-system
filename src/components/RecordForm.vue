@@ -1,5 +1,8 @@
 <script setup>
+import { validateOrder } from '../utils/orderUtils.js'
 import { ref, watch } from 'vue'
+
+
 
 const props = defineProps({
   editingRecord: { type: Object, default: null },
@@ -33,10 +36,17 @@ function resetForm() {
 }
 
 function handleSubmit() {
-  if (!customerName.value.trim() || !orderItems.value.trim() || !totalAmount.value) {
-    errorMessage.value = 'Please fill in all required fields.'
+  const result = validateOrder({
+    customerName: customerName.value,
+    orderItems: orderItems.value,
+    totalAmount: totalAmount.value
+  })
+
+  if (!result.valid) {
+    errorMessage.value = result.message
     return
   }
+
   errorMessage.value = ''
   emit('submit', {
     customerName: customerName.value.trim(),
@@ -102,7 +112,7 @@ function handleCancel() {
             class="block text-xs font-semibold uppercase tracking-wider">
             Total Amount (₱)
           </label>
-          <input v-model="totalAmount" type="number" min="0" step="0.01" placeholder="e.g. 250"
+          <input v-model="totalAmount" type="number" step="0.01" placeholder="e.g. 250"
             :class="darkMode
               ? 'bg-gray-800/60 border-gray-700 text-white placeholder-gray-600 focus:border-orange-500 focus:ring-orange-500/20'
               : 'bg-gray-50/80 border-gray-200 text-gray-900 placeholder-gray-300 focus:border-orange-400 focus:ring-orange-400/20'"
