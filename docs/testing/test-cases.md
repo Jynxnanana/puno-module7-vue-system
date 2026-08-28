@@ -1,0 +1,16 @@
+# Manual Test Cases — Food Ordering System
+
+| ID | Feature | Objective | Preconditions | Test Steps | Test Data | Expected Result | Actual Result | Status |
+|---|---|---|---|---|---|---|---|---|
+| TC-01 | Add Record | Verify a valid order can be added | App is loaded, form is empty | 1. Fill all fields 2. Click "Add Order" | Customer: Juan Dela Cruz, Items: 2x Burger, Amount: 250, Status: Pending | Order appears in list; success toast shows; count increases | *(fill in)* | *(Pass/Fail)* |
+| TC-02 | Add Record (Negative) | Verify empty required field is rejected | Form is empty | 1. Leave Customer Name blank 2. Fill other fields 3. Click "Add Order" | Customer: (blank), Items: Fries, Amount: 100 | Order is not saved; red error message appears | *(fill in)* | *(Pass/Fail)* |
+| TC-03 | Add Record (Boundary) | Verify negative total amount is rejected | Form is empty | 1. Fill Customer Name and Items 2. Enter -50 as Amount 3. Click "Add Order" | Customer: Maria, Items: Pizza, Amount: -50 | Order is not saved; validation message appears | *(fill in)* | *(Pass/Fail)* |
+| TC-04 | Display Records | Verify multiple records display correctly | At least 3 orders exist | 1. Open List View 2. Observe table/cards | N/A | All orders shown with correct customer, items, total, status | *(fill in)* | *(Pass/Fail)* |
+| TC-05 | Edit Record | Verify an existing order can be edited and saved | At least 1 order exists | 1. Click Edit on an order 2. Change Status to "Preparing" 3. Click "Update Order" | Change status field only | Order's status updates in the list; form returns to "New Order" mode | *(fill in)* | *(Pass/Fail)* |
+| TC-06 | Delete Record (Cancel) | Verify deletion can be cancelled | At least 1 order exists | 1. Click Delete on an order 2. Click "Cancel" in the modal | N/A | Order remains in the list, unchanged | *(fill in)* | *(Pass/Fail)* |
+| TC-07 | Delete Record (Confirm) | Verify an order can be deleted | At least 1 order exists | 1. Click Delete on an order 2. Click "Delete" in the modal | N/A | Order is removed from the list; toast shows "Order deleted." | *(fill in)* | *(Pass/Fail)* |
+| TC-08 | Search | Verify search finds an existing customer | At least 2 orders exist, different customer names | 1. Type an existing customer name in the search box | Search term: "Juan" | Only matching order(s) are displayed | *(fill in)* | *(Pass/Fail)* |
+| TC-09 | Search (No Match) | Verify search shows empty state for unknown name | At least 1 order exists | 1. Type a name that does not exist | Search term: "Zzzzz" | "No orders found" state is displayed | *(fill in)* | *(Pass/Fail)* |
+| TC-10 | Persistence | Verify data survives a page refresh | At least 1 order exists | 1. Refresh the browser (F5) | N/A | Previously added order(s) still appear | *(fill in)* | *(Pass/Fail)* |
+| TC-11 (recommended) | Responsive | Verify layout adapts to mobile width | App is loaded | 1. Open DevTools (F12) 2. Toggle device toolbar 3. Select a mobile size | N/A | Orders display as cards, not a squeezed table; all buttons remain tappable | *(fill in)* | *(Pass/Fail)* |
+| TC-12 (recommended) | Feedback/Count | Verify order count updates correctly | At least 1 order exists | 1. Add a new order 2. Observe "Total Orders" card | N/A | Count increases by 1 with animated count-up | *(fill in)* | *(Pass/Fail)* |
