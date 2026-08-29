@@ -14,4 +14,6 @@
 | Priority | High |
 | Evidence filename | 03-failed-unit-test.png, 04-identified-defect.png |
 | Status | New |
-| Fix commit | *(fill in after Step 10)* |
+| Application version/commit | 2609e3d — Configure Vitest and add automated tests for search, validation, and status flow |
+| Fix commit | 917e401 — Fix validation defect found during testing |
+
