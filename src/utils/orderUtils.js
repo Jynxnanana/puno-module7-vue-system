@@ -26,3 +26,16 @@ export function getNextStatus(status) {
   const flow = { Pending: 'Preparing', Preparing: 'Completed' }
   return flow[status] || null
 }
+// Normalizes records loaded from localStorage so older records
+// (saved before this change) safely default to Active (not archived).
+export function normalizeArchivedField(order) {
+  return { archived: false, ...order }
+}
+
+// Filters an order list by archive state.
+// state: 'all' | 'active' | 'archived'
+export function filterByArchiveState(orders, state) {
+  if (state === 'archived') return orders.filter(o => o.archived === true)
+  if (state === 'active') return orders.filter(o => !o.archived)
+  return orders
+}
