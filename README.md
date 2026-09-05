@@ -109,3 +109,28 @@ regression testing.
 ### CI
 GitHub Actions now runs npm run test:run followed by npm run build on every push to
 main. See the Actions tab for the latest results.
+
+## Module 9 – Software Evolution
+
+**CR-M9-01:** Add Active/Archived Order Filter
+**Maintenance type:** Perfective
+**Affected architecture:** Vue.js frontend (order list component), orderUtils.js, localStorage read path
+**Target version:** 1.1.0
+
+Implementation summary: Added an `archived` boolean field to order records, a filter
+control (All/Active/Archived) on the order list, and an Archive action for Completed
+orders. Older localStorage records without the field are normalized to `archived: false`
+on load for backward compatibility.
+
+Test results: 5 new automated tests passing (10 total); 12+ manual test cases passing
+(all Module 8 regression cases retained).
+Build: passing. CI: passing.
+Known limitations: Archived orders cannot yet be restored to Active from the UI
+(would require an "Unarchive" action — left for a future perfective change).
+
+Version: 1.1.0
+Type: Perfective Maintenance
+Added: Active/Archived order filter and Archive action for completed orders
+Preserved: CRUD, search, validation, delete confirmation, persistence
+Tests: 12+ manual cases; Vitest suite passed (10 tests); build and CI passed
+Compatibility: Older localStorage records default to Active (archived: false)

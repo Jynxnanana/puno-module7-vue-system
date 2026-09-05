@@ -16,3 +16,30 @@
 | TC-12 (recommended) | Feedback/Count | Verify order count updates correctly | At least 1 order exists | 1. Add a new order 2. Observe "Total Orders" card | N/A | Count increases by 1 with animated count-up | The "Total Orders" count and "Showing X of X order(s)" text correctly increased from 1 to 2 after adding a new order. | Pass |
 | TC-13 | Display Records (Edge) | Verify empty state displays correctly with zero orders | All orders deleted | 1. Delete all existing orders 2. Observe the Orders section | N/A | "No orders yet" message displays without errors | After deleting all orders, the "No orders yet — Add your first order using the form above" message displayed cleanly. | Pass |
 | TC-14 | Edit Record (Negative) | Verify empty required field is rejected while editing | At least 1 order exists | 1. Click Edit on an order 2. Clear the Customer Name field 3. Click "Update Order" | Customer Name cleared to blank | Update is rejected; validation message appears | The update was rejected. A red error message "Customer name is required." appeared while still in Edit Order mode. | Pass |
+
+
+# MODULE 9 — Updated Manual Test Cases
+*Food Ordering System — Ruben L. Puno Jr. | CR-M9-01: Active/Archived Order Filter*
+
+| ID | Feature | Objective | Expected Result | Actual Result | Status |
+|---|---|---|---|---|---|
+| **Retained from Module 8** | | | | | |
+| TC-01 | Add Record | Verify a valid order can be added | Order appears in list; success toast; count increases | Order appeared correctly; toast shown; count increased. | Pass |
+| TC-02 | Add Record (Negative) | Verify empty required field is rejected | Order not saved; red error message appears | Order not saved. "Customer name is required." shown. | Pass |
+| TC-03 | Add Record (Boundary) | Verify negative total amount is rejected | Order not saved; validation message appears | Rejected with "Total amount must be greater than zero." | Pass (after fix) |
+| TC-04 | Display Records | Verify multiple records display correctly | All orders shown with correct data | All orders displayed correctly. | Pass |
+| TC-05 | Edit Record | Verify an existing order can be edited and saved | Order updates in list; form resets | Order updated correctly; form reset to New Order mode. | Pass |
+| TC-06 | Delete Record (Cancel) | Verify deletion can be cancelled | Order remains in the list, unchanged | Modal closed; order remained unchanged. | Pass |
+| TC-07 | Delete Record (Confirm) | Verify an order can be deleted | Order removed; toast shows "Order deleted." | Order removed; toast with Undo shown. | Pass |
+| TC-08 | Search | Verify search finds an existing customer | Only matching order(s) displayed | Only matching order displayed. | Pass |
+| TC-09 | Search (No Match) | Verify search shows empty state for unknown name | "No matching orders" state displayed | "Showing 0 of 1 order(s)" shown. | Pass |
+| TC-10 | Persistence | Verify data survives a page refresh | Previously added order(s) still appear | Order remained visible after refresh. | Pass |
+| **New for Module 9 — CR-M9-01** | | | | | |
+| TC-15 | Archive Filter | Default view shows only Active orders | Completed-but-not-archived orders still show; no archived orders shown | Only active orders displayed by default. | Pass |
+| TC-16 | Archive Filter | Selecting "Archived" shows only archived orders | Only archived orders appear | Only archived orders shown after selecting filter. | Pass |
+| TC-17 | Archive Action | Archiving a Completed order | Order moves out of Active view; order still exists (not deleted) | Order archived successfully; still present under Archived filter. | Pass |
+| TC-18 (Negative/Edge) | Archive Action | Archive button hidden for non-Completed orders | No Archive button on Pending/Preparing orders | Archive button correctly hidden on Pending and Preparing orders. | Pass |
+| TC-19 (Compatibility) | Backward Compatibility | Old localStorage record with no `archived` field loads | Record is treated as Active; no crash | Old record loaded and treated as Active, no errors. | Pass |
+| TC-20 (Edge) | Archive Filter | "All" view with zero orders in one category | Correct empty-state message, no errors | Empty-state message displayed cleanly. | Pass |
+
+**Total: 16 manual test cases** (10 retained + 6 new). Minimum requirement of 12 met.
