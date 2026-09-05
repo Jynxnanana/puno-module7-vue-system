@@ -9,6 +9,7 @@ import AnalyticsView from './components/AnalyticsView.vue'
 import ReceiptModal from './components/ReceiptModal.vue'
 import AppFooter from './components/AppFooter.vue'
 import { playClick, playSuccess, playDelete } from './utils/sound.js'
+import { filterByArchiveState, normalizeArchivedField } from './utils/orderUtils.js'
 
 const records = ref([])
 const searchTerm = ref('')
@@ -20,6 +21,7 @@ const rippleStyle = ref({})
 const isLoading = ref(true)
 const viewMode = ref('list') // 'list' | 'board' | 'analytics'
 const statusFilter = ref(null)
+const archiveFilter = ref('active') // 'active' | 'archived' | 'all'   ← IDAGDAG ITO
 const clickedCard = ref(null)
 const listAnchor = ref(null)
 const screenShake = ref(false)
@@ -86,7 +88,7 @@ function useCountUp(targetRef) {
 
 onMounted(() => {
   const saved = localStorage.getItem('module7-records')
-  records.value = saved ? JSON.parse(saved) : []
+  records.value = saved ? JSON.parse(saved).map(normalizeArchivedField) : []
   const savedTheme = localStorage.getItem('module7-theme')
   darkMode.value = savedTheme === 'dark'
 
@@ -295,6 +297,15 @@ function updateStatus(id, newStatus) {
   playClick()
 }
 
+function archiveOrder(id) {
+  const record = records.value.find(r => r.id === id)
+  if (!record) return
+  record.archived = true
+  saveRecords()
+  pushToast('Order archived.', 'success')
+  playClick()
+}
+
 function openReceipt(record) {
   receiptRecord.value = record
 }
@@ -303,7 +314,7 @@ function closeReceipt() {
 }
 
 const filteredRecords = computed(() => {
-  let list = records.value
+  let list = filterByArchiveState(records.value, archiveFilter.value)
 
   if (statusFilter.value) {
     list = list.filter(r => r.status === statusFilter.value)
@@ -532,6 +543,17 @@ function setView(mode) {
             <p :class="darkMode ? 'text-gray-500' : 'text-gray-400'" class="text-xs whitespace-nowrap">
               Showing {{ filteredRecords.length }} of {{ totalOrdersRaw }} order(s)
             </p>
+
+              <select
+    v-model="archiveFilter"
+    :class="darkMode
+      ? 'bg-gray-800/80 border-gray-700 text-white focus:ring-orange-500'
+      : 'bg-white/70 border-gray-200 text-gray-900 focus:ring-orange-400'"
+    class="border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 shadow-sm backdrop-blur-sm">
+    <option value="active">Active Orders</option>
+    <option value="archived">Archived Orders</option>
+    <option value="all">All Orders</option>
+  </select>
           </div>
 
           <!-- View toggle -->
@@ -571,6 +593,7 @@ function setView(mode) {
                 @delete="deleteRecord"
                 @update-status="updateStatus"
                 @view-receipt="openReceipt"
+                @archive="archiveOrder"
               />
               <OrderBoard
                 v-else-if="viewMode === 'board'"
